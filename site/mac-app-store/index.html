@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preset Picker on the Mac App Store · Grain &amp; Glow</title>
+<meta name="description" content="Preset Picker is coming to the Mac App Store: one-click install, automatic updates, no security warnings. Until then, download it free from Grain & Glow.">
+<meta name="theme-color" content="#F3EDE2">
+<link rel="icon" href="../favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+<style>
+  .store-hero { grid-template-columns: 6fr 4fr; }
+  .store-hero .icon { justify-self: center; width: min(320px, 70%); height: auto; filter: drop-shadow(0 22px 40px rgba(30,27,24,.28)); }
+  .soon {
+    display: inline-flex; align-items: center; gap: 12px; padding: 13px 20px; border-radius: 3px;
+    border: 1px dashed var(--ink); font: 500 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+  }
+  .soon::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+  .compare-table { width: 100%; border-collapse: collapse; margin-top: 40px; font-size: 16px; }
+  .compare-table th, .compare-table td { text-align: left; padding: 16px 12px 16px 0; border-top: 1px solid var(--rule); vertical-align: top; }
+  .compare-table thead th { border-top: 2px solid var(--ink); font: 500 12px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .compare-table thead th.store { color: var(--rust); }
+  .compare-table tbody th { font-weight: 500; width: 28%; }
+  .compare-table td { color: var(--muted); }
+  .store-faq { max-width: var(--wrap); margin: 0 auto; padding: 80px 20px; border-top: 1px solid var(--rule); }
+  .store-faq dl { margin: 36px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 30px 48px; }
+  .store-faq dt { font-family: var(--serif); font-size: 26px; margin-bottom: 8px; }
+  .store-faq dd { margin: 0; color: var(--muted); font-size: 16px; }
+  @media (max-width: 880px) {
+    .store-hero .icon { order: -1; width: 160px; justify-self: start; }
+    .store-faq dl { grid-template-columns: 1fr; }
+    .compare-table { font-size: 15px; }
+    .compare-table tbody th { width: 34%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="wordmark" href="../">Grain <i>&amp;</i> Glow</a>
+  <nav>
+    <a href="../#how">How it works</a>
+    <a href="../#download">Download</a>
+    <a href="../app/">Web version</a>
+  </nav>
+</header>
+
+<main>
+
+  <section class="hero store-hero">
+    <div class="hero-text">
+      <p class="label">Preset Picker · Mac App Store</p>
+      <h1>Coming to the <em>Mac App Store.</em></h1>
+      <p class="lede">The same little app, just easier to get. Install it with one click, get updates on their own, and skip the "unidentified developer" warning. I'm getting it ready for Apple's review now.</p>
+      <div class="actions">
+        <span class="soon">Coming soon</span>
+        <a class="btn ghost" href="../#download">Download it free today</a>
+      </div>
+      <p class="label muted">macOS 11 or later · Apple Silicon</p>
+    </div>
+    <img class="icon" src="../icon.png" width="512" height="512" alt="Preset Picker app icon: an amber sun over a teal hill">
+  </section>
+
+  <section class="how">
+    <h2>What's <em>different</em></h2>
+    <table class="compare-table">
+      <thead>
+        <tr><th></th><th class="store">Mac App Store</th><th>Download from this site</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>Installing</th><td>One click in the App Store</td><td>Unzip, then allow it once in System Settings</td></tr>
+        <tr><th>Updates</th><td>Automatic</td><td>Download the new version yourself</td></tr>
+        <tr><th>Your folders</th><td>Asks once for each folder or card, then remembers it</td><td>Asks macOS for access the first time</td></tr>
+        <tr><th>What it does</th><td colspan="2">Exactly the same: pick a preset per photo, export with sidecars, open in Lightroom</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="store-faq">
+    <h2>Good to know</h2>
+    <dl>
+      <div><dt>When will it be out?</dt><dd>As soon as Apple has reviewed it. This page gets the App Store button the day it's live.</dd></div>
+      <div><dt>Can I use it before then?</dt><dd>Yes. <a class="textlink" href="../#download">Download it free</a>, or <a class="textlink" href="../app/">use it in your browser</a>. Nothing changes about how it works.</dd></div>
+      <div><dt>Why does it ask for folders?</dt><dd>App Store apps live in Apple's sandbox. They can only open what you point them to. Pick your presets folder, your card and where to save once, and it remembers.</dd></div>
+      <div><dt>Is my stuff uploaded anywhere?</dt><dd>No. Your photos and presets stay on your Mac. The app doesn't send anything anywhere.</dd></div>
+    </dl>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p class="wordmark small">Grain <i>&amp;</i> Glow</p>
+  <p>Lightroom presets for hobby photographers. One click, real film feel.</p>
+  <p class="label muted">Preset Picker is free and open source (MIT) ·
+    <a href="https://github.com/grainandglow/preset-picker" target="_blank" rel="noopener">Source</a></p>
+</footer>
+
+</body>
+</html>
