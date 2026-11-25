@@ -1,5 +1,5 @@
 // GitHub "owner/repo" that publishes the release downloads.
-const REPO = "abhigyansinha32-collab/preset-picker";
+const REPO = "grainandglow/preset-picker";
 
 const $ = s => document.querySelector(s);
 const repoUrl = `https://github.com/${REPO}`;
