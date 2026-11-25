@@ -17,6 +17,7 @@ UI, OUT = ROOT / "presetpicker" / "ui", ROOT / "site" / "app"
 
 for name in ("app.css", "app.js"):
     shutil.copy2(UI / name, OUT / name)
+shutil.copytree(UI / "fonts", OUT / "fonts", dirs_exist_ok=True)
 
 html = (UI / "index.html").read_text()
 html = html.replace('<html lang="en">', f'<html lang="en" data-version="{__version__} (web)">', 1)

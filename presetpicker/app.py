@@ -3,7 +3,6 @@ import io
 import json
 import os
 import shutil
-import subprocess
 import sys
 import threading
 from collections import OrderedDict
@@ -13,14 +12,14 @@ from pathlib import Path
 import webview
 from PIL import Image
 
-from . import APP_NAME, __version__, photos, presets, render
+from . import APP_NAME, __version__, photos, presets, render, sandbox
 
 UI = Path(__file__).parent / "ui" / "index.html"
 if sys.platform == "win32":
     SETTINGS_FILE = Path(os.environ.get("APPDATA", Path.home())) / APP_NAME / "settings.json"
 else:
     SETTINGS_FILE = Path("~/Library/Application Support").expanduser() / APP_NAME / "settings.json"
-DEFAULTS = {"source": "", "presets": "", "output": str(Path("~/Desktop").expanduser())}
+DEFAULTS = {"source": "", "presets": "", "output": str(sandbox.REAL_HOME / "Desktop")}
 
 
 class LRU(OrderedDict):
@@ -60,8 +59,12 @@ class Api:
             s.update(json.loads(SETTINGS_FILE.read_text()))
         except (OSError, ValueError):
             pass
-        if not s["presets"]:
+        if not s["presets"] and not sandbox.SANDBOXED:
             s["presets"] = presets.find_preset_dir() or ""
+        s.setdefault("bookmarks", {})
+        if sandbox.restore(s["bookmarks"]):
+            self._settings = s
+            self._save_settings()
         return s
 
     def _save_settings(self):
@@ -93,10 +96,25 @@ class Api:
         picked = self._window.create_file_dialog(kind, directory=start)
         if not picked:
             return None
-        return self.set_setting(key, picked[0] if isinstance(picked, (list, tuple)) else picked)
+        path = picked[0] if isinstance(picked, (list, tuple)) else picked
+        sandbox.remember(path, self._settings["bookmarks"])
+        return self.set_setting(key, path)
+
+    def _ensure_access(self, key, path):
+        """App Store build: if we may not read path yet, open the Open dialog right on it so one
+        click on Open grants access (remembered for next time). Returns the usable path or None."""
+        if not path or sandbox.covered(path):
+            return path
+        settings = self.choose_folder_at(key, path)
+        return settings[key] if settings else None
+
+    def choose_folder_at(self, key, start):
+        self._settings[key] = start
+        return self.choose_folder(key)
 
     def load_presets(self):
-        found = presets.load_presets(self._settings["presets"])
+        folder = self._settings["presets"]
+        found = presets.load_presets(folder) if sandbox.covered(folder) else []
         for p in found:
             p["settings"] = presets.summary(self._settings_for(p["id"]))
         return found
@@ -110,6 +128,7 @@ class Api:
 
     def scan_source(self, source, rescan=False):
         """Shoot days for a source folder/card: {total, days: [{date, count}]}."""
+        source = self._ensure_access("source", source)
         if not source or not Path(source).is_dir():
             return {"total": 0, "days": [], "error": "Folder not found"}
         self.set_setting("source", source)
@@ -183,7 +202,10 @@ class Api:
         picked = {int(i): pid for i, pid in choices.items() if pid}
         if not picked:
             return {"error": "No presets chosen"}
-        out_dir = Path(self._settings["output"]) / f"{APP_NAME} {datetime.now():%Y-%m-%d %H.%M.%S}"
+        output = self._ensure_access("output", self._settings["output"])
+        if not output:
+            return {"error": "Choose where to save the photos first"}
+        out_dir = Path(output) / f"{APP_NAME} {datetime.now():%Y-%m-%d %H.%M.%S}"
         out_dir.mkdir(parents=True)
         sidecars = {}
         raw = other = 0
@@ -208,13 +230,42 @@ class Api:
         if sys.platform == "win32":
             os.startfile(path)
         else:
-            subprocess.run(["open", path])
+            sandbox.reveal(path)
+
+
+def _load_file_urls_with_folder_access():
+    """WKWebView only lets a file:// page read its CSS, scripts and fonts when it is loaded with
+    loadFileURL:allowingReadAccessToURL:, which pywebview doesn't use; inside the sandbox the
+    page would otherwise stay blank."""
+    from Foundation import NSURL
+    from PyObjCTools import AppHelper
+    from webview.platforms import cocoa
+
+    plain = cocoa.BrowserView.load_url
+
+    def load_url(self, url):
+        if not url.startswith("file://"):
+            return plain(self, url)
+        self.url = url
+
+        def load():
+            page = NSURL.URLWithString_(url)
+            self.webview.loadFileURL_allowingReadAccessToURL_(page, page.URLByDeletingLastPathComponent())
+        AppHelper.callAfter(load)
+
+    cocoa.BrowserView.load_url = load_url
 
 
 def main():
     api = Api()
+    # macOS loads the UI straight from file:// — the App Sandbox blocks pywebview's local web server.
+    url = str(UI)
+    if sys.platform == "darwin":
+        webview.settings["ALLOW_FILE_URLS"] = True
+        url = UI.as_uri()
+        _load_file_urls_with_folder_access()
     window = webview.create_window(
-        APP_NAME, url=str(UI), js_api=api, width=1320, height=860,
+        APP_NAME, url=url, js_api=api, width=1320, height=860,
         min_size=(900, 620), text_select=False,
     )
     api._window = window
